@@ -1,8 +1,0 @@
-README.md
-main.py
-pyproject.toml
-auth_service.egg-info/PKG-INFO
-auth_service.egg-info/SOURCES.txt
-auth_service.egg-info/dependency_links.txt
-auth_service.egg-info/requires.txt
-auth_service.egg-info/top_level.txt

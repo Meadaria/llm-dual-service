@@ -1,0 +1,43 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# Файлы Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg-info/
+
+# База данных
+*.db
+*.sqlite
+*.sqlite3
+
+# Переменные окружения
+.env
+.env.local
+.env.*.local
+
+# Логи
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Файлы uv
+.python-version
+uv.lock
+
+# Requirements (если используете uv, requirements.txt не нужен)
+requirements.txt

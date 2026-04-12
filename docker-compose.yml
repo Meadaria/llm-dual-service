@@ -1,0 +1,55 @@
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+
+  auth_service:
+    build: ./auth_service
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./auth_service/.env
+    depends_on:
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+
+  bot_service:
+    build: ./bot_service
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./bot_service/.env
+    depends_on:
+      - redis
+      - rabbitmq
+      - auth_service
+    restart: unless-stopped
+
+  celery_worker:
+    build: ./bot_service
+    command: celery -A app.infra.celery_app worker --loglevel=info --pool=solo
+    env_file:
+      - ./bot_service/.env
+    restart: unless-stopped
+
+  telegram_bot:
+    build: ./bot_service
+    command: python -c "import asyncio; from app.bot.dispatcher import dp, bot; asyncio.run(dp.start_polling(bot))"
+    env_file:
+      - ./bot_service/.env
+    depends_on:
+      - redis
+      - rabbitmq
+      - auth_service
+    restart: unless-stopped

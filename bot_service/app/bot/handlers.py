@@ -12,7 +12,6 @@ redis_client = get_redis()
 
 @router.message(Command("token"))
 async def save_token(message: Message):
-    """Сохраняет JWT токен в Redis."""
     parts = message.text.split()
     
     if len(parts) != 2:
@@ -48,7 +47,6 @@ async def save_token(message: Message):
 
 @router.message()
 async def handle_message(message: Message):
-    """Обрабатывает текстовые сообщения и отправляет запрос в LLM."""
     tg_user_id = message.from_user.id
     
     token = await redis_client.get(f"tg_user:{tg_user_id}")
@@ -60,6 +58,10 @@ async def handle_message(message: Message):
             "/token ваш_токен"
         )
         return
+    
+    # Декодируем bytes в строку, если Redis вернул bytes
+    if isinstance(token, bytes):
+        token = token.decode('utf-8')
     
     try:
         payload = decode_and_validate(token)
@@ -77,8 +79,8 @@ async def handle_message(message: Message):
         return
     
     prompt = message.text
-    await message.answer("Запрос принят, обрабатывается...")
     
+    # Отправляем задачу в RabbitMQ через Celery
     llm_request.delay(
         tg_chat_id=tg_user_id,
         prompt=prompt,
@@ -86,3 +88,5 @@ async def handle_message(message: Message):
         system=None,
         temperature=0.7
     )
+    
+    await message.answer("Запрос принят, обрабатывается. Ответ придёт в этом чате.")

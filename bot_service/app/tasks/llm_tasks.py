@@ -1,17 +1,16 @@
 import asyncio
-from celery import shared_task
 from aiogram import Bot
 
 from app.core.config import settings
 from app.services.openrouter_client import OpenRouterClient
 from app.core.jwt import decode_and_validate
 from app.infra.redis import get_redis
-
+from app.infra.celery_app import celery_app
 
 llm_client = OpenRouterClient()
 
 
-@shared_task(name="llm_request", bind=True)
+@celery_app.task(name="llm_request", bind=True)
 def llm_request(self, tg_chat_id: int, prompt: str, user_token: str, system: str = None, temperature: float = 0.7):
     """Celery задача для вызова LLM через OpenRouter."""
     try:

@@ -1,28 +1,26 @@
 import pytest
 from unittest.mock import AsyncMock, patch
-from fakeredis.aioredis import FakeRedis
+from aiogram.types import Message, User
 
 
-@pytest.fixture(autouse=True)
-def mock_redis():
-    """Мокает Redis для всех тестов."""
-    fake_redis = FakeRedis()
-    
-    with patch("app.infra.redis.get_redis", return_value=fake_redis):
-        with patch("app.bot.handlers.redis_client", fake_redis):
-            yield fake_redis
+@pytest.fixture
+def fake_redis():
+    from fakeredis.aioredis import FakeRedis
+    redis = FakeRedis()
+    with patch("app.bot.handlers.redis_client", redis):
+        yield redis
 
 
 @pytest.fixture
 def mock_celery():
-    """Мокает Celery задачу."""
     with patch("app.tasks.llm_tasks.llm_request.delay") as mock:
         yield mock
 
 
 @pytest.fixture
-def mock_jwt():
-    """Мокает валидацию JWT."""
-    with patch("app.core.jwt.decode_and_validate") as mock:
-        mock.return_value = {"sub": "123"}
-        yield mock
+def fake_message():
+    message = AsyncMock(spec=Message)
+    message.from_user = User(id=123456, is_bot=False, first_name="Test")
+    message.text = ""
+    message.answer = AsyncMock()
+    return message

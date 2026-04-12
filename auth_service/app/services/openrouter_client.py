@@ -2,7 +2,7 @@ import httpx
 from typing import List, Dict
 
 from app.core.config import settings
-from app.core.errors import ExternalServiceError
+from auth_service.app.core.exceptions import ExternalServiceError
 
 
 class OpenRouterClient:

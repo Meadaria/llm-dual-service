@@ -1,4 +1,3 @@
-import pytest
 from jose import jwt
 from app.bot.handlers import save_token, handle_message
 from app.core.config import settings
